@@ -1,0 +1,3 @@
+void max(){
+	puts("max");
+}
