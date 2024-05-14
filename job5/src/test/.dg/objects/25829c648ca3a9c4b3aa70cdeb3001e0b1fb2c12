@@ -1,5 +1,0 @@
-blob
-28
-void max(){
-	puts("max");
-}

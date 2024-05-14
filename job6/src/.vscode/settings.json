@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "sha.h": "c",
+        "std.h": "c"
+    }
+}

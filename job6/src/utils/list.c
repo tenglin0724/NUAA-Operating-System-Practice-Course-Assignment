@@ -1,0 +1,155 @@
+#include <assert.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include "list.h"
+
+//新建链表节点
+node_t *node_new(void *data)
+{
+    node_t *this = malloc(sizeof(node_t));
+    this->next = NULL;
+    this->prev = NULL;
+    this->data = data;
+    return this;
+}
+
+//判断前后节点都为空，删除节点
+void node_delete(node_t *this)
+{
+    assert(this->next == NULL && this->prev == NULL);
+    free(this);
+}
+
+//当前节点不是最后一个节点
+int node_is_attached(node_t *this)
+{
+    return this->next != NULL;
+}
+
+//当前节点是最后一个节点
+int node_is_detached(node_t *this)
+{
+    return this->next == NULL;
+}
+
+//将左右两个链表合并
+void node_link(node_t *left, node_t *right)
+{
+    left->next = right;
+    right->prev = left;
+}
+
+//将三个链表合并
+void node_link3(node_t *left, node_t *node, node_t *right)
+{
+    node_link(left, node);
+    node_link(node, right);
+}
+
+//释放当前节点
+void node_unlink(node_t *this)
+{
+    node_link(this->prev, this->next);
+    this->next = NULL;
+    this->prev = NULL;
+}
+//插头
+void node_prepend(node_t *this, node_t *that)
+{
+    node_link3(this->prev, that, this);
+}
+//插尾
+void node_append(node_t *this, node_t *that)
+{
+    node_link3(this, that, this->next);
+}
+//初始化链表
+void list_init(list_t *this)
+{
+    this->next = this->prev = this;
+}
+
+//销毁链表
+void list_destroy(list_t *this)
+{
+}
+//判断链表是否为空
+int list_is_empty(list_t *this)
+{
+    return this->next == this;
+}
+
+//获取头部数据
+void *list_get_head(list_t *this)
+{
+    assert(!list_is_empty(this));
+    node_t *head = this->next;
+    return head->data;
+}
+//获取尾部数据
+void *list_get_tail(list_t *this)
+{
+    assert(!list_is_empty(this));
+    node_t *tail = this->prev;
+    return tail->data;
+}
+//将数据插头
+node_t *list_push_head(list_t *this, void *data)
+{
+    node_t *node = node_new(data);
+    node_link3(this, node, this->next);
+    return node;
+}
+//删除头数据
+void *list_pop_head(list_t *this)
+{
+    assert(!list_is_empty(this));
+    node_t *head = this->next;
+    node_unlink(head);
+
+    void *data = head->data;
+    node_delete(head);
+    return data;
+}
+//将数据插入尾部
+node_t *list_push_tail(list_t *this, void *data)
+{
+    node_t *node = node_new(data);
+    node_link3(this->prev, node, this);
+    return node;
+}
+//删除尾部数据
+void *list_pop_tail(list_t *this)
+{
+    assert(!list_is_empty(this));
+    node_t *tail = this->prev;
+    node_unlink(tail);
+
+    void *data = tail->data;
+    node_delete(tail);
+    return tail;
+}
+//统计链表长度
+int list_count(list_t *this)
+{
+    int sum = 0;
+    node_t *node;
+    void *data;
+    list_each (this, node, data)
+        sum++;
+    return sum;
+}
+//得到指定位置的数据
+void *list_get(list_t *this, int index)
+{
+    int i = 0;
+    node_t *node;
+    void *data;
+    list_each (this, node, data) {
+        if (i++ == index)
+            return data;
+    }
+
+    assert(0);
+    return NULL;
+}

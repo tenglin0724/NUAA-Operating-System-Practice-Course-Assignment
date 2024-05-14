@@ -1,5 +1,0 @@
-blob
-30
-void max(){
-	printf("max");
-}

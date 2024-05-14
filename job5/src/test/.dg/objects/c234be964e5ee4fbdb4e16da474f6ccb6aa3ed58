@@ -1,6 +1,0 @@
-blob
-33
-int main(){
-	max();
-	return 0;
-}
