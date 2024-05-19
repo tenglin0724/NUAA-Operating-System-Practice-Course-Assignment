@@ -95,8 +95,6 @@ void sema_signal(sema_t *sema)
 //定义全局变量
 Queue ge;
 sema_t wmutex;
-//sema_t rmutex;
-//int readcount=0;
 
 //开辟的两个线程需要调用的函数
 void pgrep_file(char *path, char *target)
@@ -111,33 +109,22 @@ void pgrep_file(char *path, char *target)
 
     fclose(file);
 }
-//相当于写者
+
 void write_job(char *path,char*target){
     sema_wait(&wmutex);
     enqueue(&ge,path,target);
-    //printf("写入文件：%s     %s\n",path,target);
     sema_signal(&wmutex);
 }
-//相当于读者
+
 void *read_job(void *arg){
     char *string = (char *)arg;
     while(1){
-        //sema_wait(&rmutex);
-        //if(readcount==0) 
         sema_wait(&wmutex);
-        //readcount++;
-        //sema_signal(&rmutex);
         job_node*temp;
-        //进行任务操作
         temp=dequeue(&ge);
-        //sema_wait(&rmutex);
-        //readcount--;
-        //if(readcount==0) 
         sema_signal(&wmutex);
-        //sema_signal(&rmutex);
 
         if(temp!=NULL){
-            //printf("%s:取走数据%s   %s,此时队列中数据情况：%d     %d\n",string,temp->path,temp->target,ge.head,ge.tail);
             if(temp->path[0]=='\0'&&temp->target[0]=='\0'){
                 pthread_exit(NULL);
             }else{
@@ -193,13 +180,10 @@ int main(int argc, char *argv[])
         init(&ge,200);
         pthread_t twork[2];
         sema_init(&wmutex,1);
-        //sema_init(&rmutex,1);
-        //void *arg[2] = {"h1","h2"};
         for(int i=0;i<2;i++){
             pthread_create(&twork[i], NULL, read_job, NULL);
         }
         grep_dir(path, string);
-        //printf("主进程已结束！此时状态为：%d      %d\n",ge.head,ge.tail);
         for(int i=0;i<2;i++){
             enqueue(&ge,NULL,NULL);
         }
