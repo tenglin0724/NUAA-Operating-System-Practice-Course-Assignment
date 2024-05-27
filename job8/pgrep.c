@@ -24,9 +24,9 @@ void init(Queue*q,int queue_len) {
     q->head = q->tail = 0;
 }
 // 入队
-void enqueue(Queue*q, char* path,char*target) {
+int enqueue(Queue*q, char* path,char*target) {
     if ((q->tail + 1) % q->capacity == q->head) {
-        return;
+        return 0; 
     }
     if(path==NULL&&target==NULL){
         q->array[q->tail].path[0]='\0';
@@ -37,10 +37,11 @@ void enqueue(Queue*q, char* path,char*target) {
     }
     //printf("主程序存入数据：%s   %s,此时队列中数据情况：%d       %d\n",path,target,q->head,q->tail);
     q->tail = (q->tail + 1) % q->capacity;
+    return 1;
 }
 // 出队
 job_node*dequeue(Queue *q) {
-    if (q->head >= q->tail) {
+    if (q->head == q->tail) {
         return NULL;
     }
     job_node*result=(job_node*)malloc(sizeof(job_node));
@@ -111,9 +112,14 @@ void pgrep_file(char *path, char *target)
 }
 
 void write_job(char *path,char*target){
-    sema_wait(&wmutex);
-    enqueue(&ge,path,target);
-    sema_signal(&wmutex);
+    while(1){
+        sema_wait(&wmutex);
+        int yes=enqueue(&ge,path,target);
+        sema_signal(&wmutex);
+        if(yes==1){
+            break;
+        }
+    }
 }
 
 void *read_job(void *arg){
@@ -177,7 +183,7 @@ int main(int argc, char *argv[])
     char *string = argv[argc - 2];
     char *path = argv[argc - 1];
     if (strcmp(argv[1], "-r") == 0){
-        init(&ge,200);
+        init(&ge,100);
         pthread_t twork[2];
         sema_init(&wmutex,1);
         for(int i=0;i<2;i++){
