@@ -14,14 +14,14 @@ for query in query_list:
 name = dict['name']
 
 lines = []
-f = open('student.txt', 'r')
+f = open('./app/student.txt', 'r')
 for line in f:
     fields = line.split()
     if name != fields[0]:
         lines.append(line)
 f.close()
 
-f = open('student.txt', 'w')
+f = open('./app/student.txt', 'w')
 for line in lines:
     f.write(line)
 f.close()
@@ -30,7 +30,7 @@ print('<h1>Remove student %s OK</h1>' % name)
 print('''
 <script>
 setTimeout(function() {
-    location.href = '/app/list_student';
+    location.href = '/app/list_student.py';
 }, 1000);
 </script>
 ''')

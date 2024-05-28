@@ -55,6 +55,44 @@ char*get_path(char*buff,int length){
     return ans;
 }
 
+//得到文件的后缀
+char *get_file_ch_last2(char *filename,char ch) {
+    char *dot = strrchr(filename, ch);
+    if (!dot || dot == filename) return NULL;
+    return dot + 1;
+}
+
+char*get_file_ch_pre2(char*file_path,char ch){
+    char *last_slash = strrchr(file_path, ch);
+    char *directory=(char*)malloc(sizeof(char)*strlen(file_path));
+    if (last_slash != NULL) {
+        strncpy(directory, file_path, last_slash - file_path);
+        directory[last_slash - file_path] = '\0';
+    } else {
+        directory[0] = '\0';
+    }
+    return directory;
+}
+
+
+//得到文件前缀
+char*get_file_ch_pre(char*file_path,char ch){
+    char *last_slash = strchr(file_path, ch);
+    char *directory=(char*)malloc(sizeof(char)*strlen(file_path));
+    if (last_slash != NULL) {
+        strncpy(directory, file_path, last_slash - file_path);
+        directory[last_slash - file_path] = '\0';
+        return directory;
+    } else {
+        return file_path;
+    }
+}
+
+char*get_file_ch_last(char*file_path,char ch){
+    char *dot = strchr(file_path, ch);
+    if (!dot || dot == file_path) return NULL;
+    return dot + 1;
+}
 
 //进行http处理
 void http_handler(int fd,char*html_content)
@@ -66,7 +104,7 @@ void http_handler(int fd,char*html_content)
     
     fprintf(fw, "HTTP/1.0 200 OK\r\n");
     fprintf(fw, "Server: tiny httpd\r\n");
-    fprintf(fw, "Content-type: text/html\r\n");
+    fprintf(fw, "Content-type: text/html;charset=utf-8\r\n");
     fprintf(fw, "Content-length: %d\r\n", content_length);
     fprintf(fw, "Connection: close\r\n");
     fprintf(fw, "\r\n");
@@ -74,9 +112,66 @@ void http_handler(int fd,char*html_content)
     fflush(fw);
 }
 
+char* read_app(int fd)
+{
+    char*ans=(char*)malloc(sizeof(char)*10000);
+    int start=0;
+    while (1) {
+        char buff[128];
+        int n;
+        n  = read(fd, buff, sizeof(buff)-1);
+        if (n == 0)
+            break;
+        buff[n]='\0';
+        write(1, buff, n);
+        sprintf(ans+start,"%s",buff);
+        start+=strlen(buff);
+    }
+    return ans;
+}
+
+//动态执行文件
+void exe_file(char*path,char*file_name,int fd,char*param){
+    printf("%s   %s  %s\n",path,file_name,param);
+    char*file_path=get_file_ch_pre2(path,'/');
+    int fds[2];
+    pipe(fds);
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        dup2(fds[1], 1);
+        close(fds[0]);
+        close(fds[1]);
+
+        if(param==NULL){
+            execlp(path,file_name,NULL);
+        }else{
+            char*para=(char*)malloc(sizeof(char)*1000);
+            sprintf(para,"QUERY_STRING=%s",param);
+            char *argv[] = {file_name, NULL};
+            char *envv[] = {para, NULL};
+            execve(path, argv, envv);
+        }
+
+        exit(0);
+    }
+    close(fds[1]);
+    char *ans=read_app(fds[0]);
+    close(fds[0]);
+    http_handler(fd,ans);
+}
+
 //处理文件
-void http_reg(int fd,char*path){
-    http_handler(fd,get_file_content(path));
+void http_reg(int fd,char*path,char*param){
+    char*extension=get_file_ch_last2(path,'.');                                        //获取文件后缀
+    if(strcmp(extension,"html")==0){
+        http_handler(fd,get_file_content(path));                                    //后缀是html
+    }else if(strstr(path,"app")!=NULL){                                             
+        char*file_name=get_file_ch_last2(path,'/');                                         //获取文件名
+        exe_file(path,file_name,fd,param);
+    }else{
+
+    }
 }
 
 //遍历文件或文件夹
@@ -117,42 +212,34 @@ void path_handler(int fd)
     int count = read(fd, buff, sizeof(buff));
     buff[count] = 0;
 
-
     //识别请求路径
     char*file_path=get_path(buff,count);
-    printf("server path: %s  %ld\n",file_path,strlen(file_path));
+    //获取请求路径后面的参数
+    char*file_param=get_file_ch_last(file_path,'?');
 
     //根据路径判别
     if(strcmp(file_path,"/")==0){
-        http_reg(fd,"./index.html");                                    //index页面
-    }else if(strlen(file_path)!=0){                                     //其他
+        http_reg(fd,"./index.html",file_param);                                 //index页面
+    }else if(strlen(file_path)!=0){        
 
-        char*path=(char*)malloc(sizeof(char)*(strlen(file_path)+1));
-        sprintf(path,".%s",file_path);
+        char*relative_path=(char*)malloc(sizeof(char)*(strlen(file_path)+1));   
+        sprintf(relative_path,".%s",file_path);
+        relative_path=get_file_ch_pre(relative_path,'?');                       //获取真实的相对路径
 
         struct stat st;
-        if(lstat(path, &st)==-1){                                  //获取文件状态
+        if(lstat(relative_path, &st)==-1){                                       //获取文件状态
             fatal("文件路径错误！");
         }                                         
-        if (S_ISDIR(st.st_mode)) {                                      //是目录
-            http_dir(fd,path);
-        }else if(S_ISREG(st.st_mode)){                                  //是文件
-            http_reg(fd,path);
+        if (S_ISDIR(st.st_mode)) {                                              //是目录
+            http_dir(fd,relative_path);
+        }else if(S_ISREG(st.st_mode)){                                          //是文件
+            http_reg(fd,relative_path,file_param);
         }else{
             fatal("文件错误！");
         }
     }else{
 
     }
-}
-
-//服务端要做的处理
-void *path_entry(void *arg)
-{
-    int fd = (long) arg;
-    path_handler(fd);
-    close(fd);
-    return NULL;
 }
 
 //监听
@@ -165,8 +252,16 @@ void run_server(char *ip_addr, int port)
          if (client_fd < 0)
             fatal("accept");
         printf("accept client\n");
-        pthread_t echo_thread;
-        pthread_create(&echo_thread, NULL, path_entry, (void *)(long)client_fd);
+
+        pid_t pid = fork();
+        if (pid == 0) {
+            close(server_fd);
+            path_handler(client_fd);
+            close(client_fd);
+            exit(0);
+        }
+        close(client_fd);
+
     }
     close(server_fd);
 }

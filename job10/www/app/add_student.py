@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import os
 
+
+
 # name=tom&age=11&gender=male
 
 query_string = os.getenv('QUERY_STRING')
@@ -15,7 +17,7 @@ name = dict['name']
 age = dict['age']
 gender = dict['gender']
 
-f = open('student.txt', 'a')
+f = open('./app/student.txt', 'a')
 line = '%s\t%s\t%s\n' % (name, age, gender)
 f.write(line)
 f.close()

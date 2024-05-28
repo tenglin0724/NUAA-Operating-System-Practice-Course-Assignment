@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-
-f = open('student.txt')
+import os
+#print(os.getcwd())
+f = open('./app/student.txt')
 print('<h1><center>Student List</center></h1>');
 print('<table border=1 cellspacing=0 width=100%>')
 
