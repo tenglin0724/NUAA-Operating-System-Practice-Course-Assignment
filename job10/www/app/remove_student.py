@@ -14,14 +14,14 @@ for query in query_list:
 name = dict['name']
 
 lines = []
-f = open('./app/student.txt', 'r')
+f = open('student.txt', 'r')
 for line in f:
     fields = line.split()
     if name != fields[0]:
         lines.append(line)
 f.close()
 
-f = open('./app/student.txt', 'w')
+f = open('student.txt', 'w')
 for line in lines:
     f.write(line)
 f.close()

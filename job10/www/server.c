@@ -1,15 +1,6 @@
 #include "std.h"
 #include "tcp.h"
 
-void http_read_req(int fd)
-{
-    FILE *fr = fdopen(fd, "r");
-
-    char line[100];
-    fgets(line, 100, fr);
-    printf("%s", line);
-}
-
 //读取html文件
 char *get_file_content(char*path){
     FILE *file = fopen(path, "rb");
@@ -131,9 +122,11 @@ char* read_app(int fd)
 }
 
 //动态执行文件
-void exe_file(char*path,char*file_name,int fd,char*param){
-    printf("%s   %s  %s\n",path,file_name,param);
-    char*file_path=get_file_ch_pre2(path,'/');
+void exe_file(char*path,int fd,char*param){
+    char*file_name=get_file_ch_last2(path,'/');
+    char*file_ch_path=(char*)malloc(sizeof(char)*1000);
+    sprintf(file_ch_path,"./%s",file_name);                 //得到改变工作路径后的文件路径
+
     int fds[2];
     pipe(fds);
     pid_t pid = fork();
@@ -142,17 +135,17 @@ void exe_file(char*path,char*file_name,int fd,char*param){
         dup2(fds[1], 1);
         close(fds[0]);
         close(fds[1]);
+        chdir("app");                                   //切换工作目录
 
         if(param==NULL){
-            execlp(path,file_name,NULL);
+            execlp(file_ch_path,file_name,NULL);
         }else{
             char*para=(char*)malloc(sizeof(char)*1000);
             sprintf(para,"QUERY_STRING=%s",param);
             char *argv[] = {file_name, NULL};
             char *envv[] = {para, NULL};
-            execve(path, argv, envv);
+            execve(file_ch_path, argv, envv);
         }
-
         exit(0);
     }
     close(fds[1]);
@@ -167,8 +160,7 @@ void http_reg(int fd,char*path,char*param){
     if(strcmp(extension,"html")==0){
         http_handler(fd,get_file_content(path));                                    //后缀是html
     }else if(strstr(path,"app")!=NULL){                                             
-        char*file_name=get_file_ch_last2(path,'/');                                         //获取文件名
-        exe_file(path,file_name,fd,param);
+        exe_file(path,fd,param);
     }else{
 
     }

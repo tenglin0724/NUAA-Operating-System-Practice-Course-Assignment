@@ -17,7 +17,7 @@ name = dict['name']
 age = dict['age']
 gender = dict['gender']
 
-f = open('./app/student.txt', 'a')
+f = open('student.txt', 'a')
 line = '%s\t%s\t%s\n' % (name, age, gender)
 f.write(line)
 f.close()
@@ -26,7 +26,7 @@ print('<h1>Add student %s OK</h1>' % name)
 print('''
 <script>
 setTimeout(function() {
-    location.href = '/app/list_student';
+    location.href = '/app/list_student.py';
 }, 1000);
 </script>
 ''')
