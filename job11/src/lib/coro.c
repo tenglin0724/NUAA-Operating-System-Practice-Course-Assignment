@@ -20,7 +20,7 @@ void coro_delete(coro_t *coro)
     free(coro->stack);
     free(coro);
 }
-
+//用于CPU切换
 unsigned long coro_resume(coro_t *that_coro)
 {
     cpu_t *source = &this_coro->cpu;

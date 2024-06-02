@@ -9,14 +9,10 @@ void produce()
 {
     puts("PRODUCE");
 
-    printf("produce 1\n");
-    coro_yield(1);
-
-    printf("produce 2\n");
-    coro_yield(1);
-
-    printf("produce 3\n");
-    coro_yield(1);
+    for(int i=0;i<8;i++){
+        printf("produce %d\n",i);
+        coro_yield(i);
+    }
 
     puts("NEVER REACH HERE");
 }
@@ -27,14 +23,10 @@ void consume()
 
     puts("\tCONSUME");
 
-    x = coro_resume(coro_p);
-    printf("\tconsume %d\n", x);
-
-    x = coro_resume(coro_p);
-    printf("\tconsume %d\n", x);
-
-    x = coro_resume(coro_p);
-    printf("\tconsume %d\n", x);
+    for(int i=0;i<8;i++){
+        x = coro_resume(coro_p);
+        printf("\tconsume %d\n", x);
+    }
 
     puts("END");
     exit(0);
