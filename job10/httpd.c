@@ -243,7 +243,6 @@ void run_server(char *ip_addr, int port)
         int client_fd = tcp_accept(server_fd);
          if (client_fd < 0)
             fatal("accept");
-        printf("accept client\n");
 
         pid_t pid = fork();
         if (pid == 0) {
@@ -262,7 +261,8 @@ void run_server(char *ip_addr, int port)
 int main(int argc, char *argv[])
 {
     char *ip_addr = "0.0.0.0";
-    int port = 1234;
+    int port = 8080;
+    chdir("www");
     run_server(ip_addr, port);
     return 0;
 }

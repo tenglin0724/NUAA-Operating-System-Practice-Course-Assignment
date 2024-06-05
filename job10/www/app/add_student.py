@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 import os
 
-
-
 # name=tom&age=11&gender=male
 
 query_string = os.getenv('QUERY_STRING')
@@ -26,7 +24,7 @@ print('<h1>Add student %s OK</h1>' % name)
 print('''
 <script>
 setTimeout(function() {
-    location.href = '/app/list_student.py';
+    location.href = '/app/list_student';
 }, 1000);
 </script>
 ''')

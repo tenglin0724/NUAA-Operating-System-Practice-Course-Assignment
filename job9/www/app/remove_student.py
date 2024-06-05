@@ -30,7 +30,7 @@ print('<h1>Remove student %s OK</h1>' % name)
 print('''
 <script>
 setTimeout(function() {
-    location.href = '/app/list_student';
+    location.href = '/app/list_student.py';
 }, 1000);
 </script>
 ''')
