@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 def produce(te):
     print("PRODUCE")
 
@@ -14,7 +15,5 @@ def consume(te):
         x = next(coro_p)
         print("\tconsume %d" % x)
         i=i+1
-
-    print("END")
 coro_p = produce(8)
 consume(8)

@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 def produce(te):
     print("PRODUCE")
 
@@ -8,22 +9,22 @@ def produce(te):
         i=i+1
 
 def filter(te):
-    print("FILTER")
+    print("\tFILTER")
 
     i=0
     while(i<8):
         x=next(coro_p)
-        print(f"filter {i}->{i*10}")
-        yield i*10
+        print(f"\tfilter {x}->{x*10}")
+        yield x*10
         i=i+1
 
 def consume(te):
-    print("\tCONSUME")
+    print("\t\tCONSUME")
 
     i=0
     while(i<8):
         x = next(coro_f)
-        print(f"\tconsume {i}")
+        print(f"\t\tconsume {x}")
         i=i+1
 
     print("END")

@@ -28,7 +28,6 @@ void consume()
         printf("\tconsume %d\n", x);
     }
 
-    puts("END");
     exit(0);
 }
 

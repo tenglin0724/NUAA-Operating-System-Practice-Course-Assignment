@@ -20,12 +20,12 @@ void produce()
 
 void filter(){
     int x;
-    puts("FILTER");
+    puts("\tFILTER");
 
     for(int i=0;i<8;i++){
         x=coro_resume(coro_p);
-        printf("filter %d->%d\n",x,x*10);
-        coro_yield(i);
+        printf("\tfilter %d->%d\n",x,x*10);
+        coro_yield(x*10);
     }
 
 }
@@ -34,11 +34,11 @@ void consume()
 {
     int x;
 
-    puts("\tCONSUME");
+    puts("\t\tCONSUME");
 
     for(int i=0;i<8;i++){
         x = coro_resume(coro_f);
-        printf("\tconsume %d\n", x);
+        printf("\t\tconsume %d\n", x);
     }
 
     puts("END");
