@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
         }
         grep_dir(path, string);
         for(int i=0;i<2;i++){
-            enqueue(&ge,NULL,NULL);
+	     write_job(NULL,NULL);
         }
         for(int i=0;i<2;i++){
             pthread_join(twork[i], NULL);

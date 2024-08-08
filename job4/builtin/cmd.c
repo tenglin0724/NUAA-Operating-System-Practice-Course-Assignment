@@ -10,7 +10,7 @@
 void exec_cmd(struct cmd *cmd)
 {
     /* 完成此函数 */
-    	int error=execvp(cmd->argv[0],cmd->argv);
+    int error=execvp(cmd->argv[0],cmd->argv);
 	if(error<0){
 		perror("exec");
     		exit(0);

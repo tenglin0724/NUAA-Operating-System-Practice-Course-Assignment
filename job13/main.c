@@ -1,13 +1,9 @@
- #define FUSE_USE_VERSION 26
-#include <fuse.h>
-#include "utils/std.h"
-#include "fs.h"
-#include "mkfs.h"
-#include "dump.h"
 #include "inode.h"
 #include "dir.h"
 #include "disk.h"
 #include "log.h"
+#include "fuse.h"
+#include "mkfs.h"
 
 int uxfs_rename(const char *old_path, const char *new_path)
 {

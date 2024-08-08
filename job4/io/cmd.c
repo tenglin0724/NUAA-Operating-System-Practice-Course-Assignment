@@ -10,12 +10,14 @@
 void exec_cmd(struct cmd *cmd){
 	//实现重定向
 	if(cmd->input!=NULL){
-		int oin=open(cmd->input,O_RDONLY,0666);
+		int oin=open(cmd->input,O_RDWR|O_CREAT,0666);
 		dup2(oin,0);
+		close(oin);
 	}
 	if(cmd->output!=NULL){
-		int out=open(cmd->output,O_WRONLY,0777);
+		int out=open(cmd->output,O_RDWR|O_CREAT,0777);
 		dup2(out,1);
+		close(out);
 	}
     	/* 完成此函数 */
     	int error=execvp(cmd->argv[0],cmd->argv);

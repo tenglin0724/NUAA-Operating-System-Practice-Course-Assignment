@@ -59,7 +59,7 @@ void exec_pipe_cmd(int cmdc, int start,struct cmd *cmdv)
         exec_cmd(&cmdv[start]);
     }else{
     /* 处理管道中包含 2 个命令的情况 */
-    	pid_t pid;
+    pid_t pid;
 	int fd[2];
 	pipe(fd);
 

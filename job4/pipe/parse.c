@@ -60,11 +60,12 @@ int parse_pipe_cmd(char *line, struct cmd *cmdv)
 	const char delim[]="|";
     /* 使用 strtok_r 完成此函数 */
 	char *tok;
-	tok=strtok_r(line,delim,&line);
+	char *store;
+	tok=strtok_r(line,delim,&store);
 	int ans=0;
 	while(tok!=NULL){
 		parse_cmd(tok,&cmdv[ans++]);
-		tok=strtok_r(NULL,delim,&line);
+		tok=strtok_r(NULL,delim,&store);
 	}
 	return ans;
 }

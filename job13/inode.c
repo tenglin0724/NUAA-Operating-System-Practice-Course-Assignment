@@ -72,22 +72,32 @@ int inode_grow(inode_t *this, int new_size)
 
 int inode_read(inode_t *this, off_t pos, void *mem, int size)
 {
+    //判断是否越届
     if (pos >= this->size)
         return 0;
+    //判断是否越界
     if (pos + size > this->size)
         size = this->size - pos;
 
     void *p = mem;
+    //设置最大的界限
     void *bound = mem + size;
     while (p < bound) {
+        //计算要偏移块的编号
         int bno = pos / BLOCK_SIZE;
+        //计算要偏移的偏移量
         int offset = pos % BLOCK_SIZE; 
         int chunk = min(bound - p, BLOCK_SIZE - offset);
 
+        //将索引节点对应的文件第bno块映射到实际的磁盘块号中
         bno = inode_map(this, bno);
+        //将磁盘块号对应的磁盘块读入内存
         void *buff = disk_seek_block(bno);
+
+        //offset+buff表示要复制的起始位置，chunk表示要复制的大小，
         memcpy(p, buff + offset, chunk);
 
+        //由于复制了chunk大小的内容，所以，两者都要自增chunk
         pos += chunk;
         p += chunk;
     }
